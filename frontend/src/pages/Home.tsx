@@ -152,7 +152,7 @@ function TournamentTimeline({ tournament }: { tournament: Tournament }) {
           QUALIFIED TEAMS
         </h3>
         <div className="grid grid-cols-2 gap-3">
-          {tournament.qualifiedTeams.map((team, index) => (
+          {(tournament.qualifiedTeams || []).map((team, index) => (
             <div
               key={team.id}
               className="bg-valorant-gray rounded-lg p-3 flex items-center justify-between"
@@ -176,7 +176,7 @@ function TournamentTimeline({ tournament }: { tournament: Tournament }) {
                 <span className="font-bold">{team.name}</span>
               </div>
               <div className="text-valorant-light text-sm">
-                {team.stats?.wins}W-{team.stats?.losses}L
+                {team.stats?.wins ?? 0}W-{team.stats?.losses ?? 0}L
               </div>
             </div>
           ))}
@@ -294,13 +294,13 @@ export default function Home() {
           </p>
           <div className="flex items-center justify-center space-x-4 text-sm text-valorant-light">
             <span>
-              📅 {tournament.startDate.toLocaleDateString()} -{" "}
-              {tournament.endDate.toLocaleDateString()}
+              📅 {tournament.startDate?.toLocaleDateString() ?? "TBD"} -{" "}
+              {tournament.endDate?.toLocaleDateString() ?? "TBD"}
             </span>
             <span>•</span>
             <span>🏟️ Monash University</span>
             <span>•</span>
-            <span>🎮 {tournament.qualifiedTeams.length} Teams</span>
+            <span>🎮 {tournament.qualifiedTeams?.length ?? 0} Teams</span>
           </div>
         </header>
 
