@@ -1,0 +1,10 @@
+{
+  "routes": [
+    {
+      "route": "/admin",
+      "methods": [
+        "get"
+      ]
+    }
+  ]
+}
