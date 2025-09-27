@@ -9,6 +9,7 @@ import BackgroundCanvas from "../components/common/BackgroundCanvas";
 export default function Home() {
   const { data: tournament, loading, error } = useTournamentData();
 
+  // Loading state - unchanged
   if (loading) {
     return (
       <div className="h-screen bg-neutral-900 flex items-center justify-center relative">
@@ -36,37 +37,44 @@ export default function Home() {
     );
   }
 
+  // Tournament-dependent content only (header, timeline)
+  const TournamentContent = () => (
+    <>
+      <header className="text-center mb-12 mt-4">
+        <h1 className="text-5xl font-bold font-valorant text-white mb-0">
+          {tournament.name || "VALORANT TOURNAMENT"}
+        </h1>
+        <p className="text-xl text-yellow-400 mb-2">2025 CLASH OF CLUBS</p>
+        <div className="flex items-center justify-center space-x-4 text-sm text-white">
+          <span>
+            📅 {tournament.startDate?.toLocaleDateString() ?? "TBD"} -{" "}
+            {tournament.endDate?.toLocaleDateString() ?? "TBD"}
+          </span>
+          <span>•</span>
+          <span>Online</span>
+          <span>•</span>
+          <span>
+            🎮 {tournament.qualifiedTeams?.length ?? 0} University Teams
+          </span>
+        </div>
+      </header>
+
+      {/* Stable grid layout - TwitchStream won't remount */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 auto-rows-fr">
+        <UpcomingMatches tournament={tournament} />
+        <TwitchStream />
+      </div>
+
+      <TournamentTimeline tournament={tournament} />
+    </>
+  );
+
   return (
     <div className="h-screen bg-neutral-900 flex flex-col overflow-hidden relative">
       <BackgroundCanvas />
       <div className="relative z-10 w-full flex-1 overflow-y-auto">
         <div className="container mx-auto px-4 py-8">
-          <header className="text-center mb-12 mt-4">
-            <h1 className="text-5xl font-bold font-valorant text-white mb-0">
-              {tournament.name || "VALORANT TOURNAMENT"}
-            </h1>
-            <p className="text-xl text-yellow-400 mb-2">2025 CLASH OF CLUBS</p>
-            <div className="flex items-center justify-center space-x-4 text-sm text-white">
-              <span>
-                📅 {tournament.startDate?.toLocaleDateString() ?? "TBD"} -{" "}
-                {tournament.endDate?.toLocaleDateString() ?? "TBD"}
-              </span>
-              <span>•</span>
-              <span>Online</span>
-              <span>•</span>
-              <span>
-                🎮 {tournament.qualifiedTeams?.length ?? 0} University Teams
-              </span>
-            </div>
-          </header>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 auto-rows-fr">
-            <UpcomingMatches tournament={tournament} />
-            <TwitchStream />
-          </div>
-
-          <TournamentTimeline tournament={tournament} />
-
+          <TournamentContent />
           <footer className="mt-16 text-center text-white">
             <div className="flex items-center justify-center space-x-6 mb-4">
               <span className="flex items-center space-x-2">

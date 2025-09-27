@@ -2,6 +2,7 @@ import React from "react";
 
 function TwitchStream() {
   const parent = window.location.hostname;
+  const channel = "monashcoding"; // Channel name for Twitch URL
 
   return (
     <div className="space-y-4">
@@ -15,7 +16,7 @@ function TwitchStream() {
       <div className="border border-yellow-400 bg-neutral-900 rounded-lg overflow-hidden">
         <div className="aspect-video">
           <iframe
-            src={`https://player.twitch.tv/?channel=grimm&parent=${parent}`}
+            src={`https://player.twitch.tv/?channel=${channel}&parent=${parent}`}
             height="100%"
             width="100%"
             frameBorder="0"
@@ -23,6 +24,18 @@ function TwitchStream() {
             allowFullScreen={true}
           />
         </div>
+      </div>
+
+      {/* Button to view full stream on Twitch */}
+      <div className="text-center">
+        <a
+          href={`https://www.twitch.tv/${channel}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block bg-yellow-400 hover:bg-yellow-300 text-neutral-900 font-bold py-2 px-6 rounded-lg transition-colors duration-200"
+        >
+          View on Twitch →
+        </a>
       </div>
     </div>
   );

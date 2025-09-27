@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Tournament } from "../types";
 
 function parseDates(obj: any): any {
@@ -44,10 +44,41 @@ function parseDates(obj: any): any {
   return obj;
 }
 
+// Deep comparison function to check if data has actually changed
+function deepEqual(obj1: any, obj2: any): boolean {
+  if (obj1 === obj2) return true;
+
+  if (obj1 == null || obj2 == null) return obj1 === obj2;
+
+  if (obj1 instanceof Date && obj2 instanceof Date) {
+    return obj1.getTime() === obj2.getTime();
+  }
+
+  if (typeof obj1 !== typeof obj2) return false;
+
+  if (typeof obj1 !== "object") return obj1 === obj2;
+
+  if (Array.isArray(obj1) !== Array.isArray(obj2)) return false;
+
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  if (keys1.length !== keys2.length) return false;
+
+  for (const key of keys1) {
+    if (!keys2.includes(key)) return false;
+    if (!deepEqual(obj1[key], obj2[key])) return false;
+  }
+
+  return true;
+}
+
 export const useTournamentData = () => {
   const [data, setData] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const previousDataRef = useRef<Tournament | null>(null);
+  const isInitialLoadRef = useRef(true);
 
   // @ts-ignore
   const API_URL = `${
@@ -55,23 +86,43 @@ export const useTournamentData = () => {
   }api/data`;
 
   const fetchData = async () => {
+    const wasInitialLoad = isInitialLoadRef.current;
+
     try {
-      setLoading(true);
+      // Only show loading state on initial load, not on polling
+      if (wasInitialLoad) {
+        setLoading(true);
+      }
       setError(null);
+
       const res = await fetch(API_URL);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
       const json = await res.json();
       const parsed = parseDates(json) as Tournament;
-      setData(parsed);
+
+      // Only update state if the data has actually changed
+      if (!deepEqual(previousDataRef.current, parsed)) {
+        previousDataRef.current = parsed;
+        setData(parsed);
+      }
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to fetch tournament data";
       setError(message);
-      setData(null);
+
+      // Only reset data on initial load errors, not polling errors
+      if (wasInitialLoad) {
+        setData(null);
+        previousDataRef.current = null;
+      }
     } finally {
-      setLoading(false);
+      // Only update loading state on initial load
+      if (wasInitialLoad) {
+        setLoading(false);
+        isInitialLoadRef.current = false;
+      }
     }
   };
 
