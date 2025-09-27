@@ -6,6 +6,7 @@ import { RoundForm } from "../components/admin/RoundForm";
 import { SlotForm } from "../components/admin/SlotForm";
 import { MatchEditor } from "../components/admin/MatchEditor";
 import { useAdminData } from "../hooks/useAdminData";
+import { Collapsible } from "../components/common/Collapsible";
 
 const defaultTournament: Tournament = {
   id: `tournament-${Date.now()}`,
@@ -519,18 +520,39 @@ function AdminPanel() {
             />
 
             <div>
-              <h2 className="text-xl font-bold text-white mb-4">
-                Qualified Teams
-              </h2>
-              <button
-                onClick={addQualifiedTeam}
-                className="mb-4 px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500"
-              >
-                Add Team
-              </button>
-              <div className="space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-white">
+                  Qualified Teams
+                </h2>
+                <button
+                  onClick={addQualifiedTeam}
+                  className="px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500"
+                >
+                  Add Team
+                </button>
+              </div>
+              <div className="space-y-3">
                 {(editedTournament?.qualifiedTeams || []).map((team, index) => (
-                  <div key={team.id} className="flex space-x-4 items-start">
+                  <Collapsible
+                    key={team.id}
+                    title={
+                      <span>
+                        {team.abbreviation || team.name || `Team ${index + 1}`}
+                      </span>
+                    }
+                    subtitle={`${team.members?.length || 0} members`}
+                    actions={
+                      <button
+                        onClick={() => removeQualifiedTeam(index)}
+                        className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        Remove
+                      </button>
+                    }
+                    defaultOpen={false}
+                    className="bg-neutral-800"
+                    contentClassName="pt-2"
+                  >
                     <TeamEditor
                       team={team}
                       onChange={(updatedTeam) =>
@@ -538,36 +560,43 @@ function AdminPanel() {
                       }
                       index={index}
                     />
-                    <button
-                      onClick={() => removeQualifiedTeam(index)}
-                      className="mt-2 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                    >
-                      Remove Team
-                    </button>
-                  </div>
+                  </Collapsible>
                 ))}
               </div>
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-white mb-4">
-                Schedule (Days)
-              </h2>
-              <button
-                onClick={addDay}
-                className="mb-4 px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500"
-              >
-                Add Day
-              </button>
-              <div className="space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-white">
+                  Schedule (Days)
+                </h2>
+                <button
+                  onClick={addDay}
+                  className="px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500"
+                >
+                  Add Day
+                </button>
+              </div>
+              <div className="space-y-3">
                 {(editedTournament?.days || []).map((day, dayIndex) => (
-                  <div
+                  <Collapsible
                     key={day.id}
-                    className="border p-4 rounded bg-neutral-800"
+                    title={<span>Day {day.dayNumber}</span>}
+                    subtitle={safeDateOnlyValue(day.date)}
+                    actions={
+                      <button
+                        onClick={() => removeDay(dayIndex)}
+                        className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        Remove
+                      </button>
+                    }
+                    defaultOpen={false}
+                    className="bg-neutral-800"
                   >
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-bold text-white">
-                        Day {day.dayNumber}:{" "}
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="text-white text-sm">
+                        Date:
                         <input
                           type="date"
                           value={safeDateOnlyValue(day.date)}
@@ -579,128 +608,168 @@ function AdminPanel() {
                           }
                           className="bg-neutral-700 text-white p-1 rounded ml-2"
                         />
-                      </h3>
+                      </label>
                       <button
-                        onClick={() => removeDay(dayIndex)}
-                        className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                        onClick={() => addRound(dayIndex)}
+                        className="px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500"
                       >
-                        Remove Day
+                        Add Round
                       </button>
                     </div>
-                    <button
-                      onClick={() => addRound(dayIndex)}
-                      className="mb-2 px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500"
-                    >
-                      Add Round
-                    </button>
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                       {day.rounds.map((round, roundIndex) => (
-                        <div
+                        <Collapsible
                           key={round.id}
-                          className="border p-3 rounded bg-neutral-700"
-                        >
-                          <RoundForm
-                            round={round}
-                            onChange={(updatedRound) =>
-                              updateRound(dayIndex, roundIndex, updatedRound)
-                            }
-                          />
-                          <div className="flex space-x-2 mt-2">
-                            <button
-                              onClick={() => removeRound(dayIndex, roundIndex)}
-                              className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                            >
-                              Remove Round
-                            </button>
-                            <button
-                              onClick={() => addSlot(dayIndex, roundIndex)}
-                              className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-                            >
-                              Add Slot
-                            </button>
-                          </div>
-                          <div className="ml-4 space-y-2 mt-2">
-                            {round.slots.map((slot, slotIndex) => (
-                              <div
-                                key={slot.id}
-                                className="border p-2 rounded bg-neutral-600"
+                          title={
+                            <span>{round.name || `Round ${round.number}`}</span>
+                          }
+                          subtitle={`Round ${round.number}`}
+                          actions={
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => addSlot(dayIndex, roundIndex)}
+                                className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
                               >
-                                <SlotForm
-                                  slot={slot}
-                                  slotIndex={slotIndex}
-                                  onChange={(updatedSlot) =>
-                                    updateSlot(
-                                      dayIndex,
-                                      roundIndex,
-                                      slotIndex,
-                                      updatedSlot
-                                    )
-                                  }
-                                />
-                                <div className="flex space-x-2 mt-1">
-                                  <button
-                                    onClick={() =>
-                                      removeSlot(
+                                Add Slot
+                              </button>
+                              <button
+                                onClick={() =>
+                                  removeRound(dayIndex, roundIndex)
+                                }
+                                className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          }
+                          defaultOpen={false}
+                          className="bg-neutral-700"
+                        >
+                          <div className="mb-3">
+                            <RoundForm
+                              round={round}
+                              onChange={(updatedRound) =>
+                                updateRound(dayIndex, roundIndex, updatedRound)
+                              }
+                            />
+                          </div>
+                          <div className="space-y-2 ml-2">
+                            {round.slots.map((slot, slotIndex) => (
+                              <Collapsible
+                                key={slot.id}
+                                title={<span>Slot {slot.number}</span>}
+                                subtitle={slot.timeSlot || "No time set"}
+                                actions={
+                                  <div className="flex items-center space-x-2">
+                                    <button
+                                      onClick={() =>
+                                        addMatch(
+                                          dayIndex,
+                                          roundIndex,
+                                          slotIndex
+                                        )
+                                      }
+                                      className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                                    >
+                                      Add Match
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        removeSlot(
+                                          dayIndex,
+                                          roundIndex,
+                                          slotIndex
+                                        )
+                                      }
+                                      className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                }
+                                defaultOpen={false}
+                                className="bg-neutral-600"
+                              >
+                                <div className="mb-2">
+                                  <SlotForm
+                                    slot={slot}
+                                    slotIndex={slotIndex}
+                                    onChange={(updatedSlot) =>
+                                      updateSlot(
                                         dayIndex,
                                         roundIndex,
-                                        slotIndex
+                                        slotIndex,
+                                        updatedSlot
                                       )
                                     }
-                                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                                  >
-                                    Remove Slot
-                                  </button>
-                                  <button
-                                    onClick={() =>
-                                      addMatch(dayIndex, roundIndex, slotIndex)
-                                    }
-                                    className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-                                  >
-                                    Add Match
-                                  </button>
+                                  />
                                 </div>
-                                <div className="ml-4 space-y-1 mt-1">
-                                  {slot.matches.map((match, matchIndex) => (
-                                    <div
-                                      key={match.id}
-                                      className="border p-1 rounded bg-neutral-500"
-                                    >
-                                      <MatchEditor
-                                        match={match}
-                                        onChange={(updatedMatch) =>
-                                          updateMatch(
-                                            dayIndex,
-                                            roundIndex,
-                                            slotIndex,
-                                            matchIndex,
-                                            updatedMatch
-                                          )
+                                <div className="space-y-2 ml-2">
+                                  {slot.matches.map((match, matchIndex) => {
+                                    const t1 =
+                                      match.team1?.abbreviation ||
+                                      match.team1?.name ||
+                                      "TBD";
+                                    const t2 =
+                                      match.team2?.abbreviation ||
+                                      match.team2?.name ||
+                                      "TBD";
+                                    const when = safeDateOnlyValue(
+                                      match.scheduledTime as any
+                                    );
+                                    return (
+                                      <Collapsible
+                                        key={match.id}
+                                        title={
+                                          <span>{`Match ${
+                                            matchIndex + 1
+                                          }: ${t1} vs ${t2}`}</span>
                                         }
-                                        teams={editedTournament.qualifiedTeams}
-                                      />
-                                      <button
-                                        onClick={() =>
-                                          removeMatch(
-                                            dayIndex,
-                                            roundIndex,
-                                            slotIndex,
-                                            matchIndex
-                                          )
+                                        subtitle={`${match.status} • ${when}`}
+                                        actions={
+                                          <button
+                                            onClick={() =>
+                                              removeMatch(
+                                                dayIndex,
+                                                roundIndex,
+                                                slotIndex,
+                                                matchIndex
+                                              )
+                                            }
+                                            className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs"
+                                          >
+                                            Remove
+                                          </button>
                                         }
-                                        className="ml-2 px-1 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs"
+                                        defaultOpen={false}
+                                        className="bg-neutral-500"
                                       >
-                                        Remove
-                                      </button>
-                                    </div>
-                                  ))}
+                                        <MatchEditor
+                                          match={match}
+                                          onChange={(updatedMatch) =>
+                                            updateMatch(
+                                              dayIndex,
+                                              roundIndex,
+                                              slotIndex,
+                                              matchIndex,
+                                              updatedMatch
+                                            )
+                                          }
+                                          teams={
+                                            editedTournament.qualifiedTeams
+                                          }
+                                        />
+                                      </Collapsible>
+                                    );
+                                  })}
                                 </div>
-                              </div>
+                              </Collapsible>
                             ))}
                           </div>
-                        </div>
+                        </Collapsible>
                       ))}
                     </div>
-                  </div>
+                  </Collapsible>
                 ))}
               </div>
             </div>

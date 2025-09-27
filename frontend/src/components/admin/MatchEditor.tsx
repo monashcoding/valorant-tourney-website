@@ -60,16 +60,40 @@ export const MatchEditor: React.FC<MatchEditorProps> = ({
   };
 
   const setTeam1 = (teamId: string) => {
+    if (!teamId) {
+      const emptyTeam: Team = {
+        id: "",
+        abbreviation: "",
+        name: "",
+        members: [],
+      };
+      handleChange("team1", emptyTeam);
+      return;
+    }
     const team = teams.find((t) => t.id === teamId);
     if (team) handleChange("team1", team);
   };
 
   const setTeam2 = (teamId: string) => {
+    if (!teamId) {
+      const emptyTeam: Team = {
+        id: "",
+        abbreviation: "",
+        name: "",
+        members: [],
+      };
+      handleChange("team2", emptyTeam);
+      return;
+    }
     const team = teams.find((t) => t.id === teamId);
     if (team) handleChange("team2", team);
   };
 
   const setWinner = (teamId: string) => {
+    if (!teamId) {
+      handleChange("winner", undefined);
+      return;
+    }
     const team = teams.find((t) => t.id === teamId);
     if (team) handleChange("winner", team);
   };
@@ -88,10 +112,10 @@ export const MatchEditor: React.FC<MatchEditorProps> = ({
             onChange={(e) => setTeam1(e.target.value)}
             className="w-full p-2 bg-neutral-700 rounded text-white"
           >
-            <option value="">Select Team 1</option>
+            <option value="">TBD</option>
             {teams.map((team) => (
               <option key={team.id} value={team.id}>
-                {team.abbreviation}
+                {team.abbreviation || team.name}
               </option>
             ))}
           </select>
@@ -106,10 +130,10 @@ export const MatchEditor: React.FC<MatchEditorProps> = ({
             onChange={(e) => setTeam2(e.target.value)}
             className="w-full p-2 bg-neutral-700 rounded text-white"
           >
-            <option value="">Select Team 2</option>
+            <option value="">TBD</option>
             {teams.map((team) => (
               <option key={team.id} value={team.id}>
-                {team.abbreviation}
+                {team.abbreviation || team.name}
               </option>
             ))}
           </select>
@@ -171,7 +195,7 @@ export const MatchEditor: React.FC<MatchEditorProps> = ({
           <option value="">No Winner</option>
           {teams.map((team) => (
             <option key={team.id} value={team.id}>
-              {team.abbreviation}
+              {team.abbreviation || team.name}
             </option>
           ))}
         </select>
