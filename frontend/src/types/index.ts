@@ -34,7 +34,6 @@ export interface Match {
 export interface TournamentSlot {
   id: string;
   number: number;
-  timeSlot: string;
   matches: Match[];
 }
 

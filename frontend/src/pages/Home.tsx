@@ -1,13 +1,16 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { useTournamentData } from "../hooks/useTournamentData";
 import UpcomingMatches from "../components/home/UpcomingMatches";
 import { TwitchStream } from "../components/home/TwitchStream";
 import { TournamentTimeline } from "../components/home/TournamentTimeline";
 import Error from "../components/error/Error";
 import BackgroundCanvas from "../components/common/BackgroundCanvas";
+import TeamModal from "../components/home/TeamModal";
+import { Team } from "../types";
 
 export default function Home() {
   const { data: tournament, loading, error } = useTournamentData();
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
 
   // Loading state - unchanged
   if (loading) {
@@ -61,11 +64,17 @@ export default function Home() {
 
       {/* Stable grid layout - TwitchStream won't remount */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 auto-rows-fr">
-        <UpcomingMatches tournament={tournament} />
+        <UpcomingMatches
+          tournament={tournament}
+          onTeamClick={setSelectedTeam}
+        />
         <TwitchStream />
       </div>
 
-      <TournamentTimeline tournament={tournament} />
+      <TournamentTimeline
+        tournament={tournament}
+        onTeamClick={setSelectedTeam}
+      />
     </>
   );
 
@@ -75,6 +84,13 @@ export default function Home() {
       <div className="relative z-10 w-full flex-1 overflow-y-auto">
         <div className="container mx-auto px-4 py-8">
           <TournamentContent />
+          {selectedTeam && (
+            <TeamModal
+              team={selectedTeam}
+              tournament={tournament}
+              onClose={() => setSelectedTeam(null)}
+            />
+          )}
           <footer className="mt-16 text-center text-white">
             <div className="flex items-center justify-center space-x-6 mb-4">
               <span className="flex items-center space-x-2">

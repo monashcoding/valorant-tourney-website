@@ -1,11 +1,12 @@
 import React from "react";
-import { Match, MapResult } from "../../types";
+import { Match, MapResult, Team } from "../../types";
 
 interface MatchupProps {
   match: Match;
+  onTeamClick?: (team: Team) => void;
 }
 
-const Matchup: React.FC<MatchupProps> = ({ match }) => {
+const Matchup: React.FC<MatchupProps> = ({ match, onTeamClick }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "scheduled":
@@ -50,8 +51,12 @@ const Matchup: React.FC<MatchupProps> = ({ match }) => {
       {/* Teams section - stacked on mobile, inline on larger screens */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-1">
         {/* Team 1 */}
-        <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0 flex-1">
-          <div className="w-5 h-5 sm:w-6 sm:h-6 bg-yellow-400 rounded-full flex items-center justify-center text-xs font-bold text-black shrink-0">
+        <button
+          type="button"
+          className="flex items-center space-x-1.5 sm:space-x-2 min-w-0 flex-1 text-left focus:outline-none"
+          onClick={() => onTeamClick?.(match.team1)}
+        >
+          <div className="px-2 py-1 bg-yellow-400 rounded-full flex items-center justify-center text-xs font-bold text-black shrink-0">
             {match.team1.abbreviation}
           </div>
           <span className="text-white font-semibold text-xs sm:text-sm truncate">
@@ -63,7 +68,7 @@ const Matchup: React.FC<MatchupProps> = ({ match }) => {
               {matchScore.team1Wins}
             </span>
           )}
-        </div>
+        </button>
 
         {/* VS and Score - hidden on mobile when there's a score */}
         <div className="hidden sm:flex items-center space-x-2 shrink-0">
@@ -79,7 +84,11 @@ const Matchup: React.FC<MatchupProps> = ({ match }) => {
         </div>
 
         {/* Team 2 */}
-        <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0 flex-1 sm:justify-end">
+        <button
+          type="button"
+          className="flex items-center space-x-1.5 sm:space-x-2 min-w-0 flex-1 sm:justify-end text-right focus:outline-none"
+          onClick={() => onTeamClick?.(match.team2)}
+        >
           {/* Show match score on mobile */}
           {matchScore && (
             <span className="text-red-400 font-bold text-xs sm:hidden">
@@ -89,10 +98,10 @@ const Matchup: React.FC<MatchupProps> = ({ match }) => {
           <span className="text-white font-semibold text-xs sm:text-sm truncate sm:order-2">
             {match.team2.name}
           </span>
-          <div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-400 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 sm:order-3">
+          <div className="px-2 py-1 bg-red-400 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 sm:order-3">
             {match.team2.abbreviation}
           </div>
-        </div>
+        </button>
       </div>
 
       {/* Compact details */}

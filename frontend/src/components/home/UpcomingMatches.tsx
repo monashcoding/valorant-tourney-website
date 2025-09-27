@@ -1,12 +1,16 @@
 import React from "react";
-import { Tournament } from "../../types";
+import { Tournament, Team } from "../../types";
 import Matchup from "./Matchup";
 
 interface UpcomingMatchesProps {
   tournament: Tournament;
+  onTeamClick?: (team: Team) => void;
 }
 
-const UpcomingMatches: React.FC<UpcomingMatchesProps> = ({ tournament }) => {
+const UpcomingMatches: React.FC<UpcomingMatchesProps> = ({
+  tournament,
+  onTeamClick,
+}) => {
   // Filter for upcoming matches (scheduled or in-progress)
   const upcomingMatches = tournament.days
     .flatMap((day) =>
@@ -43,7 +47,7 @@ const UpcomingMatches: React.FC<UpcomingMatchesProps> = ({ tournament }) => {
       </div>
       <div className="flex-1 overflow-y-auto space-y-4 pr-2">
         {upcomingMatches.map((match, index) => (
-          <Matchup key={index} match={match} />
+          <Matchup key={index} match={match} onTeamClick={onTeamClick} />
         ))}
         {upcomingMatches.length > 5 && (
           <div className="text-center py-4">

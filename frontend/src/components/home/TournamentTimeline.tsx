@@ -1,8 +1,14 @@
 import React from "react";
-import { Tournament } from "../../types";
+import { Tournament, Team } from "../../types";
 import Matchup from "./Matchup";
 
-function TournamentTimeline({ tournament }: { tournament: Tournament }) {
+function TournamentTimeline({
+  tournament,
+  onTeamClick,
+}: {
+  tournament: Tournament;
+  onTeamClick?: (team: Team) => void;
+}) {
   const formatDate = (date: Date) =>
     date.toLocaleDateString("en-US", {
       weekday: "short",
@@ -26,12 +32,14 @@ function TournamentTimeline({ tournament }: { tournament: Tournament }) {
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {tournament.qualifiedTeams.map((team) => (
-            <div
+            <button
               key={team.id}
-              className="bg-neutral-800 rounded-lg p-3 flex items-center justify-between hover:bg-neutral-700 transition-colors"
+              type="button"
+              onClick={() => onTeamClick?.(team)}
+              className="bg-neutral-800 rounded-lg p-3 flex items-center justify-between hover:bg-neutral-700 transition-colors text-left"
             >
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-lg text-black">
+                <div className="px-2 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-sm text-black">
                   {team.abbreviation}
                 </div>
                 <div>
@@ -43,7 +51,7 @@ function TournamentTimeline({ tournament }: { tournament: Tournament }) {
                   </span>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -73,12 +81,16 @@ function TournamentTimeline({ tournament }: { tournament: Tournament }) {
                         >
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-sm font-semibold text-white">
-                              Slot {slot.number} - {slot.timeSlot}
+                              Slot {slot.number}
                             </span>
                           </div>
                           <div className="space-y-2">
                             {slot.matches.map((match) => (
-                              <Matchup key={match.id} match={match} />
+                              <Matchup
+                                key={match.id}
+                                match={match}
+                                onTeamClick={onTeamClick}
+                              />
                             ))}
                           </div>
                         </div>

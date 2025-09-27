@@ -292,7 +292,6 @@ function AdminPanel() {
       const newSlot: TournamentSlot = {
         id: `slot-${Date.now()}`,
         number: round.slots.length + 1,
-        timeSlot: "",
         matches: [],
       };
       round.slots = [...round.slots, newSlot];
@@ -658,7 +657,7 @@ function AdminPanel() {
                               <Collapsible
                                 key={slot.id}
                                 title={<span>Slot {slot.number}</span>}
-                                subtitle={slot.timeSlot || "No time set"}
+                                subtitle={`Slot ${slot.number}`}
                                 actions={
                                   <div className="flex items-center space-x-2">
                                     <button
