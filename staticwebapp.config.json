@@ -2,9 +2,22 @@
   "routes": [
     {
       "route": "/admin",
-      "methods": [
-        "get"
-      ]
+      "methods": ["get"]
     }
-  ]
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/assets/*",
+      "/api/*",
+      "/favicon.ico",
+      "/robots.txt",
+      "/*.png",
+      "/*.jpg",
+      "/*.jpeg",
+      "/*.gif",
+      "/*.svg",
+      "/*.webp"
+    ]
+  }
 }
