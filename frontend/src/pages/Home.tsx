@@ -1,101 +1,88 @@
 import React from "react";
 import { useState } from "react";
 import { useTournamentData } from "../hooks/useTournamentData";
-import { Bracket, Tournament } from "../types";
+import { Tournament } from "../types";
 
-function BracketComponent({ bracket }: { bracket: Bracket }) {
+function UpcomingMatches({ tournament }: { tournament: Tournament }) {
+  const upcomingMatches = tournament.days
+    .flatMap((day) =>
+      day.rounds.flatMap((round) =>
+        round.slots.flatMap((slot) =>
+          slot.matches.filter((m) => m.status === "scheduled")
+        )
+      )
+    )
+    .slice(0, 5);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-white mb-2">
-          TOURNAMENT BRACKET
+        <h2 className="text-2xl font-bold font-valorant text-white mb-2">
+          UPCOMING MATCHES
         </h2>
         <div className="h-1 bg-yellow-400 w-48 mx-auto"></div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        <div className="border border-yellow-400 bg-neutral-900 rounded-lg p-6">
-          <h3 className="text-xl font-bold mb-4 text-yellow-400">SEMIFINALS</h3>
+      <div className="border border-yellow-400 bg-neutral-900 rounded-lg p-6 max-h-96 overflow-y-auto">
+        {upcomingMatches.length === 0 ? (
+          <p className="text-white text-center">No upcoming matches</p>
+        ) : (
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-neutral-800 rounded-lg">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-black">
-                  MAC
+            {upcomingMatches.map((match) => (
+              <div
+                key={match.id}
+                className="flex items-center justify-between p-4 bg-neutral-800 rounded-lg"
+              >
+                <div className="flex items-center space-x-4 flex-1">
+                  <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-black min-w-[48px]">
+                    {match.team1.abbreviation}
+                  </div>
+                  <span className="font-bold text-white min-w-[40px] text-center">
+                    VS
+                  </span>
+                  <div className="w-12 h-12 bg-neutral-800 rounded-full flex items-center justify-center font-bold text-white min-w-[48px]">
+                    {match.team2.abbreviation}
+                  </div>
                 </div>
-                <span className="font-bold text-white">VS</span>
-                <div className="w-12 h-12 bg-neutral-800 rounded-full flex items-center justify-center font-bold text-white">
-                  MNET
+                <div className="text-right">
+                  <div className="text-yellow-400 font-bold">
+                    {match.format}
+                  </div>
+                  <div className="text-sm text-white">
+                    {match.scheduledTime.toLocaleString()}
+                  </div>
                 </div>
               </div>
-              <div className="text-yellow-400 font-bold">BO3</div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 bg-neutral-800 rounded-lg">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-black">
-                  DEVSOC
-                </div>
-                <span className="font-bold text-white">VS</span>
-                <div className="w-12 h-12 bg-neutral-800 rounded-full flex items-center justify-center font-bold text-white">
-                  MEGA1
-                </div>
-              </div>
-              <div className="text-yellow-400 font-bold">BO3</div>
-            </div>
+            ))}
           </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="border border-yellow-400 bg-neutral-900 rounded-lg p-4">
-            <h4 className="text-lg font-bold mb-2 text-yellow-400">
-              WINNERS FINAL
-            </h4>
-            <div className="p-3 bg-neutral-800 rounded text-center">
-              <span className="text-yellow-400">TBD</span>
-            </div>
-          </div>
-
-          <div className="border border-yellow-400 bg-neutral-900 rounded-lg p-4">
-            <h4 className="text-lg font-bold mb-2 text-white">LOSERS FINAL</h4>
-            <div className="p-3 bg-neutral-800 rounded text-center">
-              <span className="text-yellow-400">TBD</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="border border-yellow-400 bg-neutral-900 rounded-lg p-6">
-          <h3 className="text-xl font-bold mb-4 text-yellow-400">
-            GRAND FINAL
-          </h3>
-          <div className="p-4 bg-yellow-400 rounded-lg text-center">
-            <span className="text-2xl font-bold text-black">CHAMPION</span>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
 
 function TwitchStream() {
+  const parent = window.location.hostname;
+
   return (
     <div className="space-y-4">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-white mb-2">LIVE STREAM</h2>
+        <h2 className="text-2xl font-bold font-valorant text-white mb-2">
+          LIVE STREAM
+        </h2>
         <div className="h-1 bg-yellow-400 w-48 mx-auto"></div>
       </div>
 
       <div className="border border-yellow-400 bg-neutral-900 rounded-lg overflow-hidden">
-        <div className="aspect-video bg-neutral-900 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-4xl mb-4">🎮</div>
-            <h3 className="text-xl font-bold text-yellow-400 mb-2">
-              TWITCH.TV/MONASHCODING
-            </h3>
-            <p className="text-white">Stream will start soon...</p>
-            <div className="mt-4 inline-block px-6 py-2 bg-yellow-400 rounded-full font-bold animate-pulse text-black">
-              LIVE
-            </div>
-          </div>
+        <div className="aspect-video">
+          <iframe
+            src={`https://player.twitch.tv/?channel=monashcoding&parent=${parent}`}
+            height="100%"
+            width="100%"
+            frameBorder="0"
+            scrolling="no"
+            allowFullScreen={true}
+          />
         </div>
 
         <div className="p-4 bg-neutral-800">
@@ -104,31 +91,11 @@ function TwitchStream() {
               <div className="w-8 h-8 bg-yellow-400 rounded-full"></div>
               <span className="font-bold text-white">Monash Coding</span>
             </div>
-            <div className="text-yellow-400">0 viewers</div>
+            <div className="text-yellow-400">Live</div>
           </div>
           <p className="text-sm text-white mt-2">
             Valorant Tournament 2024 - Day 2 Finals
           </p>
-        </div>
-      </div>
-
-      <div className="border border-yellow-400 bg-neutral-900 rounded-lg p-4">
-        <h3 className="text-lg font-bold mb-2 text-yellow-400">CHAT</h3>
-        <div className="bg-neutral-800 rounded p-3 h-32 overflow-y-auto">
-          <div className="space-y-2 text-sm">
-            <div>
-              <span className="text-yellow-400 font-bold">User1:</span> Let's go
-              MAC!
-            </div>
-            <div>
-              <span className="text-yellow-400 font-bold">User2:</span> DEVSOC
-              looking strong
-            </div>
-            <div>
-              <span className="text-yellow-400 font-bold">User3:</span> This
-              tournament is fire 🔥
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -139,7 +106,9 @@ function TournamentTimeline({ tournament }: { tournament: Tournament }) {
   return (
     <div className="space-y-4">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-white mb-2">TOURNAMENT INFO</h2>
+        <h2 className="text-2xl font-bold font-valorant text-white mb-2">
+          TOURNAMENT INFO
+        </h2>
         <div className="h-1 bg-yellow-400 w-48 mx-auto"></div>
       </div>
 
@@ -158,7 +127,7 @@ function TournamentTimeline({ tournament }: { tournament: Tournament }) {
                 <span className="font-bold text-white">{team.name}</span>
               </div>
               <div className="text-white text-sm">
-                {team.stats?.wins ?? 0}W-{team.stats?.losses ?? 0}L
+                {team.members.length} Players
               </div>
             </div>
           ))}
@@ -215,14 +184,6 @@ function TournamentTimeline({ tournament }: { tournament: Tournament }) {
 
 export default function Home() {
   const { data: tournament, loading, error } = useTournamentData();
-  const [bracket] = useState<Bracket>({
-    id: "1",
-    name: "Finals Bracket",
-    stages: [],
-    champion: undefined,
-    runnerUp: undefined,
-    thirdPlace: undefined,
-  });
 
   if (loading) {
     return (
@@ -261,10 +222,10 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-900">
-      <div className="container mx-auto px-4 py-8">
+    <div className="h-screen bg-neutral-900 flex flex-col overflow-hidden">
+      <div className="container mx-auto px-4 py-8 flex-1 overflow-y-auto">
         <header className="text-center mb-12">
-          <h1 className="text-5xl font-bold mb-4 text-white">
+          <h1 className="text-5xl font-bold font-valorant text-white mb-4">
             {tournament.name || "VALORANT TOURNAMENT"}
           </h1>
           <p className="text-xl text-yellow-400 mb-2">
@@ -282,19 +243,12 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
-            <BracketComponent bracket={bracket} />
-          </div>
-
-          <div className="lg:col-span-1">
-            <TwitchStream />
-          </div>
-
-          <div className="lg:col-span-1">
-            <TournamentTimeline tournament={tournament} />
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <UpcomingMatches tournament={tournament} />
+          <TwitchStream />
         </div>
+
+        <TournamentTimeline tournament={tournament} />
 
         <footer className="mt-16 text-center text-white">
           <div className="flex items-center justify-center space-x-6 mb-4">

@@ -1,7 +1,32 @@
 @import "tailwindcss";
 
 @layer base {
+  html {
+    background-color: rgb(15 15 15);
+  }
   body {
-    font-family: "Inter", system-ui, sans-serif;
+    font-family: "Oswald", system-ui, sans-serif;
+    background-color: rgb(15 15 15);
+  }
+}
+
+@font-face {
+  font-family: "Valorant";
+  src: url("./assets/valorant-font.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Oswald";
+  src: url("./assets/Oswald-VariableFont_wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer utilities {
+  .font-valorant {
+    font-family: "Valorant", sans-serif;
   }
 }
