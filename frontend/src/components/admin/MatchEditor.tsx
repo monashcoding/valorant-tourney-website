@@ -17,11 +17,21 @@ export const MatchEditor: React.FC<MatchEditorProps> = ({
   const safeDateValue = (date: Date | string | undefined): string => {
     try {
       const d = typeof date === "string" ? new Date(date) : date;
-      return d && !isNaN(d.getTime())
-        ? d.toISOString().slice(0, 16)
-        : new Date().toISOString().slice(0, 16);
+      const target = d && !isNaN(d.getTime()) ? d : new Date();
+      const yyyy = target.getFullYear();
+      const mm = String(target.getMonth() + 1).padStart(2, "0");
+      const dd = String(target.getDate()).padStart(2, "0");
+      const hh = String(target.getHours()).padStart(2, "0");
+      const mi = String(target.getMinutes()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
     } catch {
-      return new Date().toISOString().slice(0, 16);
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mi = String(now.getMinutes()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
     }
   };
 
@@ -63,8 +73,8 @@ export const MatchEditor: React.FC<MatchEditorProps> = ({
     if (!teamId) {
       const emptyTeam: Team = {
         id: "",
-        abbreviation: "",
-        name: "",
+        abbreviation: "TBD",
+        name: "TBD",
         members: [],
       };
       handleChange("team1", emptyTeam);
@@ -78,8 +88,8 @@ export const MatchEditor: React.FC<MatchEditorProps> = ({
     if (!teamId) {
       const emptyTeam: Team = {
         id: "",
-        abbreviation: "",
-        name: "",
+        abbreviation: "TBD",
+        name: "TBD",
         members: [],
       };
       handleChange("team2", emptyTeam);

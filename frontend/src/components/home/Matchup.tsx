@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Match, MapResult, Team } from "../../types";
 
 interface MatchupProps {
@@ -7,6 +7,57 @@ interface MatchupProps {
 }
 
 const Matchup: React.FC<MatchupProps> = ({ match, onTeamClick }) => {
+  const [now, setNow] = useState<number>(Date.now());
+
+  const isScheduled = match.status === "scheduled";
+
+  useEffect(() => {
+    if (!isScheduled) return;
+    const intervalId = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(intervalId);
+  }, [isScheduled]);
+
+  const formatDateTime = (date: Date) => {
+    const formatter = new Intl.DateTimeFormat(undefined, {
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZoneName: "short",
+    });
+    return formatter.format(date);
+  };
+
+  const formatCountdown = (msRemaining: number) => {
+    const totalSeconds = Math.max(0, Math.floor(msRemaining / 1000));
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (days > 0) {
+      return `${days}d ${hours}h ${minutes}m`;
+    }
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${seconds}s`;
+    }
+    if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    }
+    return `${seconds}s`;
+  };
+
+  const scheduledLocalTime = useMemo(
+    () => formatDateTime(match.scheduledTime),
+    [match.scheduledTime]
+  );
+
+  const countdownText = useMemo(() => {
+    if (!isScheduled) return null;
+    const msRemaining = match.scheduledTime.getTime() - now;
+    return formatCountdown(msRemaining);
+  }, [isScheduled, match.scheduledTime, now]);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "scheduled":
@@ -122,6 +173,20 @@ const Matchup: React.FC<MatchupProps> = ({ match, onTeamClick }) => {
                 </span>
               ))}
             </div>
+          )}
+
+          {/* Scheduled/local time */}
+          <span className="text-gray-500">•</span>
+          <span
+            className="text-gray-300 text-sm"
+            title={match.scheduledTime.toISOString()}
+          >
+            {scheduledLocalTime}
+          </span>
+
+          {/* Countdown for scheduled matches */}
+          {isScheduled && (
+            <span className="text-yellow-400 text-xs">in {countdownText}</span>
           )}
         </div>
 

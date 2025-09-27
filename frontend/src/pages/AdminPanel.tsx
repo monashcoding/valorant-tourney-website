@@ -60,11 +60,17 @@ function AdminPanel() {
   const safeDateOnlyValue = (date: Date | string | undefined): string => {
     try {
       const d = typeof date === "string" ? new Date(date) : date;
-      return d && !isNaN(d.getTime())
-        ? d.toISOString().split("T")[0]
-        : new Date().toISOString().split("T")[0];
+      const target = d && !isNaN(d.getTime()) ? d : new Date();
+      const yyyy = target.getFullYear();
+      const mm = String(target.getMonth() + 1).padStart(2, "0");
+      const dd = String(target.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
     } catch {
-      return new Date().toISOString().split("T")[0];
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
     }
   };
 
@@ -344,7 +350,7 @@ function AdminPanel() {
     slotIndex: number
   ) => {
     if (editedTournament) {
-      const emptyTeam = { id: "", abbreviation: "", name: "", members: [] };
+      const emptyTeam = { id: "", abbreviation: "TBD", name: "TBD", members: [] };
       const newDays = [...editedTournament.days];
       const newRounds = [...newDays[dayIndex].rounds];
       const newSlots = [...newRounds[roundIndex].slots];
@@ -599,12 +605,20 @@ function AdminPanel() {
                         <input
                           type="date"
                           value={safeDateOnlyValue(day.date)}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const [y, m, d] = e.target.value
+                              .split("-")
+                              .map((v) => parseInt(v, 10));
+                            const localDate = new Date(
+                              y,
+                              (m || 1) - 1,
+                              d || 1
+                            );
                             updateDay(dayIndex, {
                               ...day,
-                              date: new Date(e.target.value),
-                            })
-                          }
+                              date: localDate,
+                            });
+                          }}
                           className="bg-neutral-700 text-white p-1 rounded ml-2"
                         />
                       </label>

@@ -17,6 +17,13 @@ export const DayForm: React.FC<DayFormProps> = ({
 }) => {
   const [newRoundName, setNewRoundName] = useState("");
 
+  const formatLocalDate = (d: Date): string => {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
   const handleDayChange = (
     field: keyof Omit<TournamentDay, "rounds" | "leaderboard">,
     value: any
@@ -61,8 +68,12 @@ export const DayForm: React.FC<DayFormProps> = ({
           </label>
           <input
             type="date"
-            value={day.date.toISOString().split("T")[0]}
-            onChange={(e) => handleDayChange("date", new Date(e.target.value))}
+          value={formatLocalDate(day.date)}
+          onChange={(e) => {
+            const [y, m, d] = e.target.value.split("-").map((v) => parseInt(v, 10));
+            const localDate = new Date(y, (m || 1) - 1, d || 1);
+            handleDayChange("date", localDate);
+          }}
             className="w-full p-2 bg-neutral-700 rounded text-white"
           />
         </div>
