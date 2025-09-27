@@ -8,15 +8,15 @@ interface ErrorProps {
 
 const Error: React.FC<ErrorProps> = ({ error, type = "error" }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-valorant-black via-valorant-dark to-valorant-gray flex items-center justify-center p-4">
+    <div className="min-h-screen bg-neutral-900 flex items-center justify-center p-4">
       <div className="text-center max-w-md w-full">
         {type === "404" ? (
           <>
             <div className="text-6xl mb-4">⚠️</div>
-            <h1 className="text-3xl font-bold text-valorant-cyan mb-4">
+            <h1 className="text-3xl font-bold text-yellow-400 mb-4">
               Page Not Found
             </h1>
-            <p className="text-valorant-light mb-6">
+            <p className="text-white mb-6">
               This is the official website for the Valorant Tournament by Monash
               Coding Club (Sat Sep 27 - Sun Sep 28, 2025). The page you're
               looking for doesn't exist. For the official broadcast, head to
@@ -24,7 +24,7 @@ const Error: React.FC<ErrorProps> = ({ error, type = "error" }) => {
             </p>
             <Link
               to="/"
-              className="inline-block px-6 py-3 bg-valorant-red rounded-full font-bold text-white hover:bg-red-600 transition-colors"
+              className="inline-block px-6 py-3 bg-yellow-400 rounded-full font-bold text-black hover:bg-yellow-500 transition-colors"
             >
               Go Home
             </Link>
@@ -32,7 +32,7 @@ const Error: React.FC<ErrorProps> = ({ error, type = "error" }) => {
               href="https://twitch.tv/monashcoding"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block px-6 py-3 bg-valorant-purple rounded-full font-bold text-white hover:bg-purple-700 transition-colors ml-4"
+              className="inline-block px-6 py-3 bg-yellow-400 rounded-full font-bold text-black hover:bg-yellow-500 transition-colors ml-4"
             >
               Watch Live on Twitch
             </a>
@@ -40,23 +40,23 @@ const Error: React.FC<ErrorProps> = ({ error, type = "error" }) => {
         ) : (
           <>
             <div className="text-6xl mb-4">💥</div>
-            <h1 className="text-3xl font-bold text-valorant-red mb-4">
+            <h1 className="text-3xl font-bold text-yellow-400 mb-4">
               Something Went Wrong
             </h1>
-            <p className="text-valorant-light mb-6">
+            <p className="text-white mb-6">
               This is the official website for the Valorant Tournament by Monash
               Coding Club (Sat Sep 27 - Sun Sep 28, 2025). An unexpected error
               occurred. For the official broadcast, head to
               twitch.tv/monashcoding.
             </p>
             {error && (
-              <div className="bg-valorant-gray p-4 rounded mb-6 text-sm text-valorant-orange">
+              <div className="bg-yellow-400 p-4 rounded mb-6 text-sm text-black">
                 <strong>Details:</strong> {error}
               </div>
             )}
             <button
               onClick={() => window.location.reload()}
-              className="inline-block px-6 py-3 bg-valorant-cyan rounded-full font-bold text-valorant-dark hover:bg-cyan-400 transition-colors"
+              className="inline-block px-6 py-3 bg-yellow-400 rounded-full font-bold text-black hover:bg-yellow-500 transition-colors"
             >
               Retry
             </button>
@@ -64,7 +64,7 @@ const Error: React.FC<ErrorProps> = ({ error, type = "error" }) => {
               href="https://twitch.tv/monashcoding"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block px-6 py-3 bg-valorant-purple rounded-full font-bold text-white hover:bg-purple-700 transition-colors ml-4"
+              className="inline-block px-6 py-3 bg-yellow-400 rounded-full font-bold text-black hover:bg-yellow-500 transition-colors ml-4"
             >
               Watch Live on Twitch
             </a>

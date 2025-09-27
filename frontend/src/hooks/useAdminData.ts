@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 
+// @ts-ignore
 const getAPI_URL = () => `${import.meta.env.VITE_BACKEND_API || ""}api/data`;
 
 export const useAdminData = (token: string) => {

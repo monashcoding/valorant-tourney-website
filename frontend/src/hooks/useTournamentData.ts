@@ -49,6 +49,7 @@ export const useTournamentData = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // @ts-ignore
   const API_URL = `${import.meta.env.VITE_BACKEND_API || ""}api/data`;
 
   const fetchData = async () => {
