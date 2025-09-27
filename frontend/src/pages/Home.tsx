@@ -1,7 +1,6 @@
 import React from "react";
 import { useTournamentData } from "../hooks/useTournamentData";
-import { Tournament } from "../types";
-import { UpcomingMatches } from "../components/home/UpcomingMatches";
+import UpcomingMatches from "../components/home/UpcomingMatches";
 import { TwitchStream } from "../components/home/TwitchStream";
 import { TournamentTimeline } from "../components/home/TournamentTimeline";
 import Error from "../components/error/Error";
@@ -61,7 +60,7 @@ export default function Home() {
             </div>
           </header>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 auto-rows-fr">
             <UpcomingMatches tournament={tournament} />
             <TwitchStream />
           </div>
@@ -71,16 +70,13 @@ export default function Home() {
           <footer className="mt-16 text-center text-white">
             <div className="flex items-center justify-center space-x-6 mb-4">
               <span className="flex items-center space-x-2">
-                <span className="text-yellow-400">🔴</span>
-                <span>Live on Twitch</span>
+                <span>Streamed on Twitch</span>
               </span>
               <span>•</span>
-              <span>Follow @MonashCoding</span>
-              <span>•</span>
-              <span>#ValorantTournament</span>
+              <span>@monashcoding on Instagram, Twitch</span>
             </div>
             <p className="text-sm">
-              © 2024 Monash Coding Club. All rights reserved.
+              © 2025 Monash Association of Coding. All rights reserved.
             </p>
           </footer>
         </div>

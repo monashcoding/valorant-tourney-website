@@ -15,7 +15,7 @@ function TwitchStream() {
       <div className="border border-yellow-400 bg-neutral-900 rounded-lg overflow-hidden">
         <div className="aspect-video">
           <iframe
-            src={`https://player.twitch.tv/?channel=monashcoding&parent=${parent}`}
+            src={`https://player.twitch.tv/?channel=grimm&parent=${parent}`}
             height="100%"
             width="100%"
             frameBorder="0"
