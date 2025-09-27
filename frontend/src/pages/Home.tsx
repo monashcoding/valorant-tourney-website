@@ -4,14 +4,17 @@ import { Tournament } from "../types";
 import { UpcomingMatches } from "../components/home/UpcomingMatches";
 import { TwitchStream } from "../components/home/TwitchStream";
 import { TournamentTimeline } from "../components/home/TournamentTimeline";
+import Error from "../components/error/Error";
+import BackgroundCanvas from "../components/common/BackgroundCanvas";
 
 export default function Home() {
   const { data: tournament, loading, error } = useTournamentData();
 
   if (loading) {
     return (
-      <div className="h-screen bg-neutral-900 flex items-center justify-center">
-        <div className="text-center text-yellow-400">
+      <div className="h-screen bg-neutral-900 flex items-center justify-center relative">
+        <BackgroundCanvas />
+        <div className="relative z-10 text-center text-yellow-400">
           <div className="text-4xl mb-4 animate-spin">🎮</div>
           <p className="text-xl">Loading Tournament Data...</p>
         </div>
@@ -20,35 +23,26 @@ export default function Home() {
   }
 
   if (error) {
+    return <Error error={`Error loading tournament: ${error}`} />;
+  }
+
+  if (!tournament) {
     return (
-      <div className="h-screen bg-neutral-900 flex items-center justify-center">
-        <div className="text-center text-yellow-400">
-          <div className="text-4xl mb-4">⚠️</div>
-          <p className="text-xl">Error loading tournament: {error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-6 py-2 bg-yellow-400 rounded-full font-bold text-black hover:bg-yellow-500"
-          >
-            Retry
-          </button>
+      <div className="h-screen bg-neutral-900 flex items-center justify-center relative">
+        <BackgroundCanvas />
+        <div className="relative z-10">
+          <p className="text-white">No tournament data available.</p>
         </div>
       </div>
     );
   }
 
-  if (!tournament) {
-    return (
-      <div className="h-screen bg-neutral-900 flex items-center justify-center">
-        <p className="text-white">No tournament data available.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="h-screen bg-neutral-900 flex flex-col overflow-hidden">
-      <div className="w-full flex-1 overflow-y-auto">
+    <div className="h-screen bg-neutral-900 flex flex-col overflow-hidden relative">
+      <BackgroundCanvas />
+      <div className="relative z-10 w-full flex-1 overflow-y-auto">
         <div className="container mx-auto px-4 py-8">
-          <header className="text-center mb-12">
+          <header className="text-center mb-12 mt-4">
             <h1 className="text-5xl font-bold font-valorant text-white mb-0">
               {tournament.name || "VALORANT TOURNAMENT"}
             </h1>

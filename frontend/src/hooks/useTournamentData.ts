@@ -50,7 +50,9 @@ export const useTournamentData = () => {
   const [error, setError] = useState<string | null>(null);
 
   // @ts-ignore
-  const API_URL = `${import.meta.env.VITE_BACKEND_API || ""}api/data`;
+  const API_URL = `${
+    import.meta.env.VITE_BACKEND_API || "https://valorant-json.jasondev.me/"
+  }api/data`;
 
   const fetchData = async () => {
     try {

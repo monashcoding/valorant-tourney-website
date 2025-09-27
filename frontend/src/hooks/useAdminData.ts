@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { Tournament } from "../types";
 
 // @ts-ignore
-const getAPI_URL = () => `${import.meta.env.VITE_BACKEND_API || ""}api/data`;
+const getAPI_URL = () =>
+  `${
+    import.meta.env.VITE_BACKEND_API || "https://valorant-json.jasondev.me/"
+  }api/data`;
 
 export const useAdminData = (token: string) => {
   const [data, setData] = useState<Tournament | null>(null);
