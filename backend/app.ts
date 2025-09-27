@@ -6,7 +6,11 @@ import { MongoClient, Collection, UpdateResult } from "mongodb";
 import { LRUCache } from "lru-cache";
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://valorant.monashcoding.com"],
+  })
+);
 app.use(express.json());
 
 const PORT = 3001;
@@ -50,6 +54,11 @@ app.post("/api/data", async (req: Request, res: Response) => {
       { upsert: true }
     );
     cache.set("current", jsonData);
+    res.set({
+      "Cache-Control": "no-store, no-cache, must-revalidate, private",
+      "Pragma": "no-cache",
+      "Expires": "0",
+    });
     res.json({ success: true });
   } catch (err: unknown) {
     console.error("Error storing data:", err);
@@ -66,6 +75,11 @@ app.get("/api/data", async (req: Request, res: Response) => {
       data = doc ? doc.json : {};
       cache.set("current", data);
     }
+    res.set({
+      "Cache-Control": "no-store, no-cache, must-revalidate, private",
+      "Pragma": "no-cache",
+      "Expires": "0",
+    });
     res.json(data);
   } catch (err: unknown) {
     console.error("Error retrieving data:", err);

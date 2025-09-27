@@ -96,14 +96,25 @@ export interface Tournament {
 export interface BracketStage {
   id: string;
   name: string;
-  type: 'single-elimination' | 'double-elimination' | 'round-robin';
+  type: 'group-stage' | 'single-elimination' | 'winners-bracket' | 'losers-bracket';
   rounds: TournamentRound[];
+  qualifiedTeams?: number;
+}
+
+export interface Semifinal {
+  id: string;
+  semifinal1: Match;
+  semifinal2: Match;
+  winnersFinal: Match;
+  losersFinal: Match;
 }
 
 export interface Bracket {
   id: string;
   name: string;
   stages: BracketStage[];
-  finals?: Match[];
+  semifinals?: Semifinal;
   champion?: Team;
+  runnerUp?: Team;
+  thirdPlace?: Team;
 }
