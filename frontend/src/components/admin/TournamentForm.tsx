@@ -1,5 +1,5 @@
 import React from "react";
-import { Tournament, TournamentStatus } from "../../types";
+import { Tournament } from "../../types";
 
 interface TournamentFormProps {
   tournament: Tournament;
@@ -41,7 +41,7 @@ export const TournamentForm: React.FC<TournamentFormProps> = ({
   };
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onChange({ status: e.target.value as TournamentStatus });
+    onChange({ status: e.target.value as Tournament["status"] });
   };
 
   return (
@@ -105,25 +105,7 @@ export const TournamentForm: React.FC<TournamentFormProps> = ({
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-white mb-1">
-            Current Day
-          </label>
-          <input
-            type="number"
-            name="currentDay"
-            value={tournament.currentDay || ""}
-            onChange={(e) =>
-              onChange({
-                currentDay: e.target.value
-                  ? parseInt(e.target.value)
-                  : undefined,
-              })
-            }
-            className="w-full p-2 bg-neutral-800 rounded text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
-            min="1"
-          />
-        </div>
+        {/* currentDay removed in simplified types */}
       </div>
     </div>
   );

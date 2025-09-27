@@ -1,5 +1,5 @@
 import React from "react";
-import { Match, MatchStatus, MatchFormat, Team, MapResult } from "../../types";
+import { Match, Team, MapResult } from "../../types";
 
 interface MatchEditorProps {
   match: Match;
@@ -47,7 +47,6 @@ export const MatchEditor: React.FC<MatchEditorProps> = ({
 
   const addMap = () => {
     const newMap: MapResult = {
-      id: `map-${Date.now()}`,
       mapName: "",
       team1Score: 0,
       team2Score: 0,
@@ -122,14 +121,11 @@ export const MatchEditor: React.FC<MatchEditorProps> = ({
           </label>
           <select
             value={match.format}
-            onChange={(e) =>
-              handleChange("format", e.target.value as MatchFormat)
-            }
+            onChange={(e) => handleChange("format", e.target.value)}
             className="w-full p-2 bg-neutral-700 rounded text-white"
           >
             <option value="BO1">BO1</option>
             <option value="BO3">BO3</option>
-            <option value="BO5">BO5</option>
           </select>
         </div>
       </div>
@@ -142,7 +138,7 @@ export const MatchEditor: React.FC<MatchEditorProps> = ({
           <input
             type="datetime-local"
             value={safeDateValue(match.scheduledTime)}
-            onChange={handleChange}
+            onChange={(e) => handleChange("scheduledTime", e.target.value)}
             className="w-full p-2 bg-neutral-700 rounded text-white"
           />
         </div>
@@ -153,15 +149,12 @@ export const MatchEditor: React.FC<MatchEditorProps> = ({
           </label>
           <select
             value={match.status}
-            onChange={(e) =>
-              handleChange("status", e.target.value as MatchStatus)
-            }
+            onChange={(e) => handleChange("status", e.target.value)}
             className="w-full p-2 bg-neutral-700 rounded text-white"
           >
             <option value="scheduled">Scheduled</option>
             <option value="in-progress">In Progress</option>
             <option value="completed">Completed</option>
-            <option value="postponed">Postponed</option>
           </select>
         </div>
       </div>
@@ -188,7 +181,7 @@ export const MatchEditor: React.FC<MatchEditorProps> = ({
         <h5 className="text-md font-semibold text-yellow-400 mb-2">Maps</h5>
         {match.maps.map((map, index) => (
           <div
-            key={map.id}
+            key={index}
             className="flex space-x-2 items-center bg-neutral-700 p-2 rounded mb-2"
           >
             <input

@@ -17,7 +17,7 @@ export const TeamEditor: React.FC<TeamEditorProps> = ({
   const [newPlayerRole, setNewPlayerRole] = useState("");
 
   const handleTeamChange = (
-    field: keyof Omit<Team, "members" | "stats">,
+    field: keyof Omit<Team, "members">,
     value: string
   ) => {
     onChange({ ...team, [field]: value });

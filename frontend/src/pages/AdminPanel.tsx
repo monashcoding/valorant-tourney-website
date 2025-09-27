@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Tournament } from "../types";
-import { useAdminData } from "../hooks/useAdminData";
+import { Tournament, TournamentRound, TournamentSlot, Match } from "../types";
 import { TournamentForm } from "../components/admin/TournamentForm";
 import { TeamEditor } from "../components/admin/TeamEditor";
-import { DayForm } from "../components/admin/DayForm";
+import { RoundForm } from "../components/admin/RoundForm";
+import { SlotForm } from "../components/admin/SlotForm";
+import { MatchEditor } from "../components/admin/MatchEditor";
+import { useAdminData } from "../hooks/useAdminData";
 
 const defaultTournament: Tournament = {
   id: `tournament-${Date.now()}`,
@@ -11,10 +13,8 @@ const defaultTournament: Tournament = {
   startDate: new Date(),
   endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // +1 week
   days: [],
-  currentDay: undefined,
-  status: "upcoming" as const,
   qualifiedTeams: [],
-  winners: [],
+  status: "upcoming" as const,
 };
 
 function AdminPanel() {
@@ -37,9 +37,10 @@ function AdminPanel() {
 
     const newObj = Array.isArray(obj) ? [] : {};
     for (const [key, value] of Object.entries(obj)) {
+      const lowerKey = key.toLowerCase();
       if (
         typeof value === "string" &&
-        (key.includes("Date") || key.includes("Time"))
+        (lowerKey.includes("date") || lowerKey.includes("time"))
       ) {
         const date = new Date(value);
         newObj[key] = isNaN(date.getTime()) ? new Date() : date; // Fallback if invalid
@@ -53,6 +54,68 @@ function AdminPanel() {
       }
     }
     return newObj;
+  };
+
+  const safeDateOnlyValue = (date: Date | string | undefined): string => {
+    try {
+      const d = typeof date === "string" ? new Date(date) : date;
+      return d && !isNaN(d.getTime())
+        ? d.toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0];
+    } catch {
+      return new Date().toISOString().split("T")[0];
+    }
+  };
+
+  const sanitizeTournamentBeforeSave = (t: Tournament): Tournament => {
+    const ensureDate = (v: any): Date => {
+      if (v instanceof Date) return v;
+      const d = new Date(v);
+      return isNaN(d.getTime()) ? new Date() : d;
+    };
+
+    return {
+      ...t,
+      startDate: ensureDate(t.startDate),
+      endDate: ensureDate(t.endDate),
+      days: t.days.map((day) => ({
+        ...day,
+        date: ensureDate(day.date),
+        rounds: day.rounds.map((round) => ({
+          ...round,
+          number:
+            typeof round.number === "number"
+              ? round.number
+              : parseInt(String(round.number)) || 0,
+          slots: round.slots.map((slot) => ({
+            ...slot,
+            number:
+              typeof slot.number === "number"
+                ? slot.number
+                : parseInt(String(slot.number)) || 0,
+            matches: slot.matches.map((m) => ({
+              ...m,
+              scheduledTime: ensureDate(m.scheduledTime),
+              maps: m.maps.map((map) => ({
+                mapName: String(map.mapName || ""),
+                team1Score:
+                  typeof map.team1Score === "number"
+                    ? map.team1Score
+                    : parseInt(String(map.team1Score)) || 0,
+                team2Score:
+                  typeof map.team2Score === "number"
+                    ? map.team2Score
+                    : parseInt(String(map.team2Score)) || 0,
+              })),
+            })),
+          })),
+        })),
+      })),
+      qualifiedTeams: t.qualifiedTeams.map((team) => ({
+        ...team,
+        members: team.members.map((p) => ({ ...p })),
+      })),
+    };
   };
 
   const addWarning = (msg: string) => setWarnings((prev) => [...prev, msg]);
@@ -110,14 +173,6 @@ function AdminPanel() {
         abbreviation: "",
         name: "",
         members: [],
-        stats: {
-          wins: 0,
-          losses: 0,
-          roundsWon: 0,
-          roundsLost: 0,
-          mapWins: 0,
-          mapLosses: 0,
-        },
       };
       setEditedTournament({
         ...editedTournament,
@@ -150,7 +205,6 @@ function AdminPanel() {
         dayNumber: editedTournament.days.length + 1,
         date: new Date(),
         rounds: [],
-        leaderboard: [],
       };
       setEditedTournament({
         ...editedTournament,
@@ -162,13 +216,188 @@ function AdminPanel() {
   const removeDay = (dayIndex: number) => {
     if (editedTournament) {
       const newDays = editedTournament.days.filter((_, i) => i !== dayIndex);
+      // Renumber days
+      const renumberedDays = newDays.map((day, i) => ({
+        ...day,
+        dayNumber: i + 1,
+      }));
+      setEditedTournament({ ...editedTournament, days: renumberedDays });
+    }
+  };
+
+  const updateRound = (
+    dayIndex: number,
+    roundIndex: number,
+    updatedRound: TournamentRound
+  ) => {
+    if (editedTournament) {
+      const newDays = [...editedTournament.days];
+      const newRounds = [...newDays[dayIndex].rounds];
+      newRounds[roundIndex] = updatedRound;
+      newDays[dayIndex] = { ...newDays[dayIndex], rounds: newRounds };
+      setEditedTournament({ ...editedTournament, days: newDays });
+    }
+  };
+
+  const addRound = (dayIndex: number) => {
+    if (editedTournament) {
+      const newDays = [...editedTournament.days];
+      const day = { ...newDays[dayIndex] };
+      const newRound: TournamentRound = {
+        id: `round-${Date.now()}`,
+        number: day.rounds.length + 1,
+        name: `Round ${day.rounds.length + 1}`,
+        slots: [],
+      };
+      day.rounds = [...day.rounds, newRound];
+      newDays[dayIndex] = day;
+      setEditedTournament({ ...editedTournament, days: newDays });
+    }
+  };
+
+  const removeRound = (dayIndex: number, roundIndex: number) => {
+    if (editedTournament) {
+      const newDays = [...editedTournament.days];
+      const day = { ...newDays[dayIndex] };
+      day.rounds = day.rounds.filter((_, i) => i !== roundIndex);
+      day.rounds = day.rounds.map((r, i) => ({ ...r, number: i + 1 }));
+      newDays[dayIndex] = day;
+      setEditedTournament({ ...editedTournament, days: newDays });
+    }
+  };
+
+  const updateSlot = (
+    dayIndex: number,
+    roundIndex: number,
+    slotIndex: number,
+    updatedSlot: TournamentSlot
+  ) => {
+    if (editedTournament) {
+      const newDays = [...editedTournament.days];
+      const newRounds = [...newDays[dayIndex].rounds];
+      const newSlots = [...newRounds[roundIndex].slots];
+      newSlots[slotIndex] = updatedSlot;
+      newRounds[roundIndex] = { ...newRounds[roundIndex], slots: newSlots };
+      newDays[dayIndex] = { ...newDays[dayIndex], rounds: newRounds };
+      setEditedTournament({ ...editedTournament, days: newDays });
+    }
+  };
+
+  const addSlot = (dayIndex: number, roundIndex: number) => {
+    if (editedTournament) {
+      const newDays = [...editedTournament.days];
+      const newRounds = [...newDays[dayIndex].rounds];
+      const round = { ...newRounds[roundIndex] };
+      const newSlot: TournamentSlot = {
+        id: `slot-${Date.now()}`,
+        number: round.slots.length + 1,
+        timeSlot: "",
+        matches: [],
+      };
+      round.slots = [...round.slots, newSlot];
+      newRounds[roundIndex] = round;
+      newDays[dayIndex] = { ...newDays[dayIndex], rounds: newRounds };
+      setEditedTournament({ ...editedTournament, days: newDays });
+    }
+  };
+
+  const removeSlot = (
+    dayIndex: number,
+    roundIndex: number,
+    slotIndex: number
+  ) => {
+    if (editedTournament) {
+      const newDays = [...editedTournament.days];
+      const newRounds = [...newDays[dayIndex].rounds];
+      const round = { ...newRounds[roundIndex] };
+      round.slots = round.slots.filter((_, i) => i !== slotIndex);
+      round.slots = round.slots.map((s, i) => ({ ...s, number: i + 1 }));
+      newRounds[roundIndex] = round;
+      newDays[dayIndex] = { ...newDays[dayIndex], rounds: newRounds };
+      setEditedTournament({ ...editedTournament, days: newDays });
+    }
+  };
+
+  const updateMatch = (
+    dayIndex: number,
+    roundIndex: number,
+    slotIndex: number,
+    matchIndex: number,
+    updatedMatch: Match
+  ) => {
+    if (editedTournament) {
+      const newDays = [...editedTournament.days];
+      const newRounds = [...newDays[dayIndex].rounds];
+      const newSlots = [...newRounds[roundIndex].slots];
+      const newMatches = [...newSlots[slotIndex].matches];
+      newMatches[matchIndex] = updatedMatch;
+      newSlots[slotIndex] = { ...newSlots[slotIndex], matches: newMatches };
+      newRounds[roundIndex] = { ...newRounds[roundIndex], slots: newSlots };
+      newDays[dayIndex] = { ...newDays[dayIndex], rounds: newRounds };
+      setEditedTournament({ ...editedTournament, days: newDays });
+    }
+  };
+
+  const addMatch = (
+    dayIndex: number,
+    roundIndex: number,
+    slotIndex: number
+  ) => {
+    if (editedTournament) {
+      const emptyTeam = { id: "", abbreviation: "", name: "", members: [] };
+      const newDays = [...editedTournament.days];
+      const newRounds = [...newDays[dayIndex].rounds];
+      const newSlots = [...newRounds[roundIndex].slots];
+      const slot = { ...newSlots[slotIndex] };
+      const newMatch: Match = {
+        id: `match-${Date.now()}`,
+        team1: emptyTeam,
+        team2: emptyTeam,
+        scheduledTime: new Date(),
+        status: "scheduled" as const,
+        format: "BO1" as const,
+        maps: [],
+        winner: undefined,
+      };
+      slot.matches = [...slot.matches, newMatch];
+      newSlots[slotIndex] = slot;
+      newRounds[roundIndex] = { ...newRounds[roundIndex], slots: newSlots };
+      newDays[dayIndex] = { ...newDays[dayIndex], rounds: newRounds };
+      setEditedTournament({ ...editedTournament, days: newDays });
+    }
+  };
+
+  const removeMatch = (
+    dayIndex: number,
+    roundIndex: number,
+    slotIndex: number,
+    matchIndex: number
+  ) => {
+    if (editedTournament) {
+      const newDays = [...editedTournament.days];
+      const newRounds = [...newDays[dayIndex].rounds];
+      const newSlots = [...newRounds[roundIndex].slots];
+      const slot = { ...newSlots[slotIndex] };
+      slot.matches = slot.matches.filter((_, i) => i !== matchIndex);
+      newSlots[slotIndex] = slot;
+      newRounds[roundIndex] = { ...newRounds[roundIndex], slots: newSlots };
+      newDays[dayIndex] = { ...newDays[dayIndex], rounds: newRounds };
       setEditedTournament({ ...editedTournament, days: newDays });
     }
   };
 
   const handleSave = () => {
     if (editedTournament) {
-      saveData(editedTournament);
+      try {
+        const sanitized = sanitizeTournamentBeforeSave(editedTournament);
+        saveData(sanitized);
+      } catch (e) {
+        addWarning(
+          "Failed to sanitize data before saving. Attempting raw save."
+        );
+        // Attempt raw save to partially persist whatever is valid
+        saveData(editedTournament);
+      }
     }
   };
 
@@ -331,26 +560,151 @@ function AdminPanel() {
                 Add Day
               </button>
               <div className="space-y-4">
-                {(editedTournament?.days || []).map((day, index) => (
-                  <div key={day.id}>
-                    <DayForm
-                      day={day}
-                      onChange={(updatedDay) => updateDay(index, updatedDay)}
-                      dayIndex={index}
-                      teams={editedTournament.qualifiedTeams}
-                    />
+                {(editedTournament?.days || []).map((day, dayIndex) => (
+                  <div
+                    key={day.id}
+                    className="border p-4 rounded bg-neutral-800"
+                  >
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-bold text-white">
+                        Day {day.dayNumber}:{" "}
+                        <input
+                          type="date"
+                          value={safeDateOnlyValue(day.date)}
+                          onChange={(e) =>
+                            updateDay(dayIndex, {
+                              ...day,
+                              date: new Date(e.target.value),
+                            })
+                          }
+                          className="bg-neutral-700 text-white p-1 rounded ml-2"
+                        />
+                      </h3>
+                      <button
+                        onClick={() => removeDay(dayIndex)}
+                        className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        Remove Day
+                      </button>
+                    </div>
                     <button
-                      onClick={() => removeDay(index)}
-                      className="ml-4 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                      onClick={() => addRound(dayIndex)}
+                      className="mb-2 px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500"
                     >
-                      Remove Day
+                      Add Round
                     </button>
+                    <div className="space-y-4">
+                      {day.rounds.map((round, roundIndex) => (
+                        <div
+                          key={round.id}
+                          className="border p-3 rounded bg-neutral-700"
+                        >
+                          <RoundForm
+                            round={round}
+                            onChange={(updatedRound) =>
+                              updateRound(dayIndex, roundIndex, updatedRound)
+                            }
+                          />
+                          <div className="flex space-x-2 mt-2">
+                            <button
+                              onClick={() => removeRound(dayIndex, roundIndex)}
+                              className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                            >
+                              Remove Round
+                            </button>
+                            <button
+                              onClick={() => addSlot(dayIndex, roundIndex)}
+                              className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                            >
+                              Add Slot
+                            </button>
+                          </div>
+                          <div className="ml-4 space-y-2 mt-2">
+                            {round.slots.map((slot, slotIndex) => (
+                              <div
+                                key={slot.id}
+                                className="border p-2 rounded bg-neutral-600"
+                              >
+                                <SlotForm
+                                  slot={slot}
+                                  slotIndex={slotIndex}
+                                  onChange={(updatedSlot) =>
+                                    updateSlot(
+                                      dayIndex,
+                                      roundIndex,
+                                      slotIndex,
+                                      updatedSlot
+                                    )
+                                  }
+                                />
+                                <div className="flex space-x-2 mt-1">
+                                  <button
+                                    onClick={() =>
+                                      removeSlot(
+                                        dayIndex,
+                                        roundIndex,
+                                        slotIndex
+                                      )
+                                    }
+                                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                  >
+                                    Remove Slot
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      addMatch(dayIndex, roundIndex, slotIndex)
+                                    }
+                                    className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                                  >
+                                    Add Match
+                                  </button>
+                                </div>
+                                <div className="ml-4 space-y-1 mt-1">
+                                  {slot.matches.map((match, matchIndex) => (
+                                    <div
+                                      key={match.id}
+                                      className="border p-1 rounded bg-neutral-500"
+                                    >
+                                      <MatchEditor
+                                        match={match}
+                                        onChange={(updatedMatch) =>
+                                          updateMatch(
+                                            dayIndex,
+                                            roundIndex,
+                                            slotIndex,
+                                            matchIndex,
+                                            updatedMatch
+                                          )
+                                        }
+                                        teams={editedTournament.qualifiedTeams}
+                                      />
+                                      <button
+                                        onClick={() =>
+                                          removeMatch(
+                                            dayIndex,
+                                            roundIndex,
+                                            slotIndex,
+                                            matchIndex
+                                          )
+                                        }
+                                        className="ml-2 px-1 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs"
+                                      >
+                                        Remove
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Winners editing can be added as simple team selects */}
             <div>
               <h2 className="text-xl font-bold text-white mb-4">Winners</h2>
               <p className="text-white">

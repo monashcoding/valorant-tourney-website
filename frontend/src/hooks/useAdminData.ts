@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
+import { Tournament } from "../types";
 
 // @ts-ignore
 const getAPI_URL = () => `${import.meta.env.VITE_BACKEND_API || ""}api/data`;
 
 export const useAdminData = (token: string) => {
-  const [data, setData] = useState<any>(null);
-  const [editedData, setEditedData] = useState<any>(null);
+  const [data, setData] = useState<Tournament | null>(null);
+  const [editedData, setEditedData] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState("");
@@ -21,8 +22,8 @@ export const useAdminData = (token: string) => {
         throw new Error("Failed to fetch data");
       }
       const json = await res.json();
-      setData(json);
-      setEditedData(JSON.parse(JSON.stringify(json))); // deep copy
+      setData(json as Tournament);
+      setEditedData(JSON.parse(JSON.stringify(json)) as Tournament); // deep copy
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error fetching data");
     } finally {
@@ -30,7 +31,7 @@ export const useAdminData = (token: string) => {
     }
   };
 
-  const saveData = async (dataToSave: any) => {
+  const saveData = async (dataToSave: Tournament) => {
     if (!token) {
       setError("Admin token is required");
       return;
@@ -65,13 +66,13 @@ export const useAdminData = (token: string) => {
   const updateEditedData = (jsonString: string) => {
     const value = jsonString;
     try {
-      const newData = JSON.parse(value);
+      const newData = JSON.parse(value) as Tournament;
       setEditedData(newData);
       if (error && error.includes("Invalid JSON")) setError(null);
     } catch (parseErr) {
       // Ignore invalid JSON while typing
       if (value.trim() === "") {
-        setEditedData({});
+        setEditedData(null);
       }
     }
   };
