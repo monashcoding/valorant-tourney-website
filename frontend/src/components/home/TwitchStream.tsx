@@ -27,7 +27,7 @@ function TwitchStream() {
       </div>
 
       {/* Button to view full stream on Twitch */}
-      <div className="text-center">
+      <div className="text-center space-x-4">
         <a
           href={`https://www.twitch.tv/${channel}`}
           target="_blank"
@@ -35,6 +35,14 @@ function TwitchStream() {
           className="inline-block bg-yellow-400 hover:bg-yellow-300 text-neutral-900 font-bold py-2 px-6 rounded-lg transition-colors duration-200"
         >
           View on Twitch →
+        </a>
+        <a
+          href="https://www.instagram.com/monashcoding"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block border border-yellow-400 text-yellow-400 hover:bg-yellow-400/10 font-bold py-2 px-6 rounded-lg transition-colors duration-200"
+        >
+          Follow us on Instagram
         </a>
       </div>
     </div>
