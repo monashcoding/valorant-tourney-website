@@ -11,18 +11,28 @@ const UpcomingMatches: React.FC<UpcomingMatchesProps> = ({
   tournament,
   onTeamClick,
 }) => {
-  // Filter for upcoming matches (scheduled or in-progress)
+  // Get today's date for comparison
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Filter for upcoming matches (scheduled, in-progress, or completed from today)
   const upcomingMatches = tournament.days
-    .flatMap((day) =>
-      day.rounds.flatMap((round) =>
+    .flatMap((day) => {
+      const dayDate = new Date(day.date);
+      dayDate.setHours(0, 0, 0, 0);
+      const isToday = dayDate.getTime() === today.getTime();
+
+      return day.rounds.flatMap((round) =>
         round.slots.flatMap((slot) =>
           slot.matches.filter(
             (match) =>
-              match.status === "scheduled" || match.status === "in-progress"
+              match.status === "scheduled" ||
+              match.status === "in-progress" ||
+              (match.status === "completed" && isToday)
           )
         )
-      )
-    )
+      );
+    })
     .sort((a, b) => a.scheduledTime.getTime() - b.scheduledTime.getTime())
     .slice(0, 6); // Show next 6 matches
 
