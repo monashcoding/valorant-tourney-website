@@ -46,9 +46,6 @@ function TournamentTimeline({
                   <span className="font-bold text-white block">
                     {team.name}
                   </span>
-                  <span className="text-sm text-gray-400">
-                    {team.members.length} Players
-                  </span>
                 </div>
               </div>
             </button>

@@ -39,9 +39,6 @@ function TeamModal({ team, tournament, onClose }: TeamModalProps) {
             </div>
             <div>
               <h3 className="text-xl font-bold text-white">{team.name}</h3>
-              <p className="text-sm text-gray-400">
-                {team.members.length} Players
-              </p>
             </div>
           </div>
           <button
